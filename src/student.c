@@ -37,8 +37,9 @@ static Node* find_student_node_by_id(List* list, const char* id) {
 /**
  * @brief 打印单个学生数据
  * @param stu 指向需要打印的学生结构体常量指针
+ * @param op 0->不含标头，1->含标头
  */
-static void student_printf_single(const Student* stu) {
+static void student_printf_single(const Student* stu, int op) {
 	// 防御一下
 	if (stu == NULL) return;
 
@@ -47,10 +48,18 @@ static void student_printf_single(const Student* stu) {
 		total_score += stu->scores[i];
 	}
 
-	printf("| %-10s | %-10s | 语文: %-3d | 数学: %-3d | 英语: %-3d | 总分: %-3d |\n",
-		stu->id, stu->name,
-		stu->scores[CHINESE], stu->scores[MATH], stu->scores[ENGLISH],
-		total_score);
+	if(op == 0) {
+		printf("%-12s\t%-12s\t%-6d\t%-6d\t%-6d\t%-6d\n",
+			stu->id, stu->name,
+			stu->scores[CHINESE], stu->scores[MATH], stu->scores[ENGLISH],
+			total_score);
+	}
+	else if (op == 1) {
+		printf("| 学号: %-10s | 姓名: %-10s | 语文: %-3d | 数学: %-3d | 英语: %-3d | 总分: %-3d |\n",
+			stu->id, stu->name,
+			stu->scores[CHINESE], stu->scores[MATH], stu->scores[ENGLISH],
+			total_score);
+	}
 }
 
 /*
@@ -95,7 +104,7 @@ bool student_query_by_id(List* list, const char* id) {
 	}
 
 	Student* student = (Student*)target_node->data;
-	student_printf_single(student);
+	student_printf_single(student, 1);
 	return true;
 }
 
@@ -128,7 +137,7 @@ int student_query_by_name(List* list, const char* name) {
 		Student* student = (Student*)current->data;
 
 		if (strcmp(student->name, name) == 0) {
-			student_printf_single(student);
+			student_printf_single(student, 1);
 			match_count++;
 		}
 		current = current->next;
@@ -186,17 +195,17 @@ void student_print_all(List* list) {
 	}
 
 	printf("\n【学生成绩总表】(总人数: %d)\n", list->size);
-	printf("--------------------------------------------------\n");
+	printf("------------------------------------------------------------\n");
 	printf("%-12s\t%-12s\t%-6s\t%-6s\t%-6s\t%-6s\n", "学号", "姓名", "语文", "数学", "英语", "总分");
-	printf("--------------------------------------------------\n");
+	printf("------------------------------------------------------------\n");
 
 	Node* current = list->head->next;
 	while (current != list->tail) {
 		Student* student = (Student*)current->data;
-		student_printf_single(student);
+		student_printf_single(student, 0);
 		current = current->next;
 	}
-	printf("--------------------------------------------------\n");
+	printf("------------------------------------------------------------\n");
 }
 
 /*

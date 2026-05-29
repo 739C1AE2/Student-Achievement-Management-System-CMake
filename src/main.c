@@ -95,7 +95,7 @@ static bool collect_student_input(char* out_id, char* out_name, int out_scores[]
 
 
 /**
- * @brief 数据初始化函数
+ * @brief 数据初始化函数/添加多个学生数据函数
  */
 void create(List* list) {
 	// 保证不会出现相同的学号
@@ -373,13 +373,10 @@ void mainpage(List* list)
 		case 0:my_exit(list); break;
 		default:printf("不是有效的功能，请重新选择\n");
 		}
-
-#ifdef _WIN32
-		system("pause");
-#else
 		printf("按回车键继续...");
-		getchar();
-#endif
+		if (getchar() != 1) {
+			;
+		}
 	}
 }
 
