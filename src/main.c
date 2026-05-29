@@ -16,6 +16,7 @@
 
 #include "list.h"
 #include "student.h"
+#include "terminal_colors.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -50,16 +51,16 @@ static int get_int(const char* prompt, int min, int max) {
 		if (scanf("%d", &value) == 1) {
 			clear_buffer();
 			if (value < min) {
-				fprintf(stderr, "输入无效: 输入的数至少为 %d\n", min);
+				fprintf(stderr, C_ERR "输入无效: 输入的数至少为 %d\n" COLOR_RESET, min);
 				continue;
 			}
 			else if (value > max) {
-				fprintf(stderr, "输入无效: 输入的数最大为 %d\n", max);
+				fprintf(stderr, C_ERR "输入无效: 输入的数最大为 %d\n" COLOR_RESET, max);
 				continue;
 			}
 			return value;
 		}
-		fprintf(stderr, "输入错误: 请输入一个整数\n");
+		fprintf(stderr, C_ERR "输入错误: 请输入一个整数\n" COLOR_RESET);
 		clear_buffer();
 	}
 }
@@ -70,7 +71,7 @@ static int get_int(const char* prompt, int min, int max) {
  * @brief 收集一个学生数据的内部辅助函数
  */
 static bool collect_student_input(char* out_id, char* out_name, int out_scores[]) {
-	printf("请输入学号: ");
+	printf(C_HINT "请输入学号: " COLOR_RESET);
 	// 懒得管了，不是数字就不是数字吧
 	if (scanf("%19s", out_id) != 1) {
 		clear_buffer();
@@ -80,11 +81,11 @@ static bool collect_student_input(char* out_id, char* out_name, int out_scores[]
 
 	// 防止误触回车
 	while (true) {
-		printf("请输入姓名: ");
+		printf(C_HINT "请输入姓名: " COLOR_RESET);
 		int res = scanf("%49[^\n]", out_name);
 		clear_buffer();
 		if (res == 1) break;
-		printf("输入错误: 姓名不能为空，请重新输入！\n");
+		printf(C_ERR "输入错误: 姓名不能为空，请重新输入！\n" COLOR_RESET);
 	}
 
 	out_scores[CHINESE] = get_int("请输入语文成绩 [0-100]: ", 0, 100);
@@ -103,7 +104,7 @@ void create(List* list) {
 	char id[MAX_ID_LEN], name[MAX_NAME_LEN];
 	int scores[SUBJECT_COUNT];
 	for (int i = 0; i < student_count; i++) {
-		printf("\n--- 录入第 %d/%d 个学生 ---\n", i + 1, student_count);
+		printf("\n" C_SUBTITLE "--- 录入第 " C_HIGHLIGHT "%d" C_SUBTITLE "/" C_HIGHLIGHT "%d" C_SUBTITLE " 个学生 ---\n" COLOR_RESET, i + 1, student_count);
 		if (collect_student_input(id, name, scores)) {
 			student_add(list, id, name, scores);
 		}
@@ -119,18 +120,18 @@ void add(List* list) {
 	char id[MAX_ID_LEN], name[MAX_NAME_LEN];
 	int scores[SUBJECT_COUNT];
 	do {
-		printf("\n--- 开始录入新增学生信息 ---\n");
+		printf("\n" C_SUBTITLE "--- 开始录入新增学生信息 ---\n" COLOR_RESET);
 		if (collect_student_input(id, name, scores)) {
 			if (student_add(list, id, name, scores)) {
-				printf("系统提示: 学生数据添加成功！\n");
+				printf(C_OK "系统提示: 学生数据添加成功！\n" COLOR_RESET);
 			}
 		}
-		printf("是否继续添加数据？(y/n)");
+		printf(C_HINT "是否继续添加数据？(y/n)" COLOR_RESET);
 		if (scanf("%c", &choice) == 1) {
 			clear_buffer();
 		}
 		else {
-			printf("输入无效，清重试！\n");
+			printf(C_ERR "输入无效，请重试！\n" COLOR_RESET);
 			clear_buffer();
 			return;
 		}
@@ -143,31 +144,31 @@ void add(List* list) {
  */
 void del(List* list) {
 	if (list == NULL || list->size == 0) {
-		printf("链表为空，不能删除数据。\n");
-		printf("请先使用初始化功能、新增数据功能或导入数据功能！\n");
+		printf(C_WARN "链表为空，不能删除数据。\n" COLOR_RESET);
+		printf(C_HINT "请先使用初始化功能、新增数据功能或导入数据功能！\n" COLOR_RESET);
 		return;
 	}
-	printf("数据删除 子菜单\n");
-	printf(" 1 按学号删除\n");
-	printf(" 2 按姓名删除\n");
-	printf(" 0 返回系统主菜单\n");
+	printf(C_SUBTITLE "数据删除 子菜单\n" COLOR_RESET);
+	printf(" " C_HIGHLIGHT "1" COLOR_RESET " 按学号删除\n");
+	printf(" " C_HIGHLIGHT "2" COLOR_RESET " 按姓名删除\n");
+	printf(" " C_HIGHLIGHT "0" COLOR_RESET " 返回系统主菜单\n");
 	int choice = get_int("请输入您的选择: ", 0, 2);
 
 	if (choice == 1) {
 		char id[MAX_ID_LEN];
-		printf("请输入要删除的学号: ");
+		printf(C_HINT "请输入要删除的学号: " COLOR_RESET);
 		if (scanf("%19s", id) != 1) {
 			clear_buffer();
 			return;
 		}
 		clear_buffer();
 		if (student_delete_by_id(list, id)) {
-			printf("系统提示: 该学生已被成功删除！\n");
+			printf(C_OK "系统提示: 该学生已被成功删除！\n" COLOR_RESET);
 		}
 	}
 	else if (choice == 2) {
 		char name[MAX_NAME_LEN];
-		printf("请输入要删除的姓名: ");
+		printf(C_HINT "请输入要删除的姓名: " COLOR_RESET);
 		if (scanf("%49s", name) != 1) {
 			clear_buffer();
 			return;
@@ -183,21 +184,21 @@ void del(List* list) {
  */
 void find(List* list) {
 	if (list == NULL || list->size == 0) {
-		printf("链表为空，不能查找数据。\n");
-		printf("请先使用初始化功能、新增数据功能或导入数据功能！\n");
+		printf(C_WARN "链表为空，不能查找数据。\n" COLOR_RESET);
+		printf(C_HINT "请先使用初始化功能、新增数据功能或导入数据功能！\n" COLOR_RESET);
 		return;
 	}
-	printf("\n==== 数据查询 子菜单 ====\n");
-	printf("  1 按学号查询\n");
-	printf("  2 按姓名查询\n");
-	printf("  0 返回系统主菜单\n");
-	printf("=========================\n");
+	printf("\n" C_SUBTITLE "==== 数据查询 子菜单 ====\n" COLOR_RESET);
+	printf("  " C_HIGHLIGHT "1" COLOR_RESET " 按学号查询\n");
+	printf("  " C_HIGHLIGHT "2" COLOR_RESET " 按姓名查询\n");
+	printf("  " C_HIGHLIGHT "0" COLOR_RESET " 返回系统主菜单\n");
+	printf(C_SUBTITLE "=========================\n" COLOR_RESET);
 	int choice = get_int("请输入您的选择: ", 0, 2);
 
 
 	if (choice == 1) {
 		char id[MAX_ID_LEN];
-		printf("请输入要查询的学号: ");
+		printf(C_HINT "请输入要查询的学号: " COLOR_RESET);
 		if (scanf("%19s", id) != 1) {
 			clear_buffer();
 			return;
@@ -207,7 +208,7 @@ void find(List* list) {
 	}
 	else if (choice == 2) {
 		char name[MAX_NAME_LEN];
-		printf("请输入要查询的姓名: ");
+		printf(C_HINT "请输入要查询的姓名: " COLOR_RESET);
 		if (scanf("%49s", name) != 1) {
 			clear_buffer();
 			return;
@@ -223,12 +224,12 @@ void find(List* list) {
  */
 void put(List* list) {
 	if (list == NULL || list->size == 0) {
-		printf("链表为空，不需要导出数据！\n");
+		printf(C_WARN "链表为空，不需要导出数据！\n" COLOR_RESET);
 		return;
 	}
 	FILE* fp = fopen("students.dat", "wb");
 	if (fp == NULL) {
-		printf("错误: 无法创建或打开数据保存文件！\n");
+		printf(C_ERR "错误: 无法创建或打开数据保存文件！\n" COLOR_RESET);
 		return;
 	}
 	Node* current = list->head->next;
@@ -239,7 +240,7 @@ void put(List* list) {
 		current = current->next;
 	}
 	fclose(fp);
-	printf("数据已成功安全导出至本地 [students.dat] 文件！\n");
+	printf(C_OK "数据已成功安全导出至本地 [students.dat] 文件！\n" COLOR_RESET);
 	student_clear_all_data(list);
 }
 
@@ -250,14 +251,14 @@ void put(List* list) {
 void get(List* list) {
 	if (list == NULL) return;
 	if (list->size > 0) {
-		printf("警告: 当前内存中有已有数据，导入后原数据将完全丢失!\n");
-		printf("是否确认覆盖并继续导入数据？(确认 - y):");
+		printf(C_WARN "警告: 当前内存中有已有数据，导入后原数据将完全丢失!\n" COLOR_RESET);
+		printf(C_WARN "是否确认覆盖并继续导入数据？(确认 - y):" COLOR_RESET);
 		char choice;
 		if (scanf("%c", &choice) == 1) {
 			clear_buffer();
 		}
 		else {
-			printf("输入无效，清重试！\n");
+			printf(C_ERR "输入无效，请重试！\n" COLOR_RESET);
 			clear_buffer();
 			return;
 		}
@@ -270,15 +271,15 @@ void get(List* list) {
 	}
 	FILE* fp = fopen("students.dat", "rb");
 	if (fp == NULL) {
-		printf("错误: 没有找到本地 [students.dat] 数据文件，请先创建并导出数据！\n");
+		printf(C_ERR "错误: 没有找到本地 [students.dat] 数据文件，请先创建并导出数据！\n" COLOR_RESET);
 		return;
 	}
 
-	printf("\n正在安全读取文件并还原链表结构...\n");
+	printf("\n" C_SUBTITLE "正在安全读取文件并还原链表结构...\n" COLOR_RESET);
 	while (1) {
 		Student* current_student = (Student*)malloc(sizeof(Student));
 		if (current_student == NULL) {
-			printf("系统级内存不足！\n");
+			printf(C_ERR "系统级内存不足！\n" COLOR_RESET);
 			fclose(fp);
 			return;
 		}
@@ -290,7 +291,7 @@ void get(List* list) {
 		list_append(list, current_student);
 	}
 	fclose(fp);
-	printf("成功: 已成功从文件读取并加载了 %d 条历史数据！\n", list->size);
+	printf(C_OK "成功: 已成功从文件读取并加载了 %d 条历史数据！\n" COLOR_RESET, list->size);
 }
 
 
@@ -308,12 +309,12 @@ void read(List* list) {
 void my_exit(List* list) {
 	if (list != NULL && list->size > 0) {
 		char choice;
-		printf("检测到当前内存存在未存盘数据，是否在退出前导出到文件？(y/n):");
+		printf(C_WARN "检测到当前内存存在未存盘数据，是否在退出前导出到文件？(y/n):" COLOR_RESET);
 		if (scanf("%c", &choice) == 1) {
 			clear_buffer();
 		}
 		else {
-			printf("输入无效，清重试！\n");
+			printf(C_ERR "输入无效，请重试！\n" COLOR_RESET);
 			clear_buffer();
 			return;
 		}
@@ -327,7 +328,7 @@ void my_exit(List* list) {
 	}
     // 关闭备用屏幕缓冲区
     printf("\033[?1049l");
-	printf("\n感谢使用学生成绩管理信息系统，再见！\n");
+	printf(C_TITLE "\n感谢使用学生成绩管理信息系统，再见！\n" COLOR_RESET);
 	exit(0);
 }
 
@@ -339,16 +340,16 @@ void print_menu(List* list, int* choice_ptr)
 {
 	// 清屏
     printf("\033[3J\033[2J\033[H");
-	printf("========================================\n");
-	printf("        学生成绩管理信息系统 v2.0        \n");
-	printf("       [ 当前在册学生总数: %-3d 人 ]      \n", list ? list->size : 0);
-	printf("========================================\n");
-	printf("  [1] 初始化数据    [5] 导出数据        \n");
-	printf("  [2] 新增数据      [6] 导入数据        \n");
-	printf("  [3] 删除数据      [7] 浏览数据        \n");
-	printf("  [4] 查找数据      [0] 退出系统        \n");
-	printf("========================================\n");
-	*choice_ptr = get_int("请选择功能编号 [0-7]: ", 0, 7);
+	printf(C_BORDER "========================================\n" COLOR_RESET);
+	printf(C_TITLE  "        学生成绩管理信息系统 v2.0        \n" COLOR_RESET);
+	printf("       [ 当前在册学生总数: " C_HIGHLIGHT "%-3d" COLOR_RESET " 人 ]      \n", list ? list->size : 0);
+	printf(C_BORDER "========================================\n" COLOR_RESET);
+	printf("  [" C_HIGHLIGHT "1" COLOR_RESET "] 初始化数据    [" C_HIGHLIGHT "5" COLOR_RESET "] 导出数据        \n");
+	printf("  [" C_HIGHLIGHT "2" COLOR_RESET "] 新增数据      [" C_HIGHLIGHT "6" COLOR_RESET "] 导入数据        \n");
+	printf("  [" C_HIGHLIGHT "3" COLOR_RESET "] 删除数据      [" C_HIGHLIGHT "7" COLOR_RESET "] 浏览数据        \n");
+	printf("  [" C_HIGHLIGHT "4" COLOR_RESET "] 查找数据      [" C_HIGHLIGHT "0" COLOR_RESET "] 退出系统        \n");
+	printf(C_BORDER "========================================\n" COLOR_RESET);
+	*choice_ptr = get_int(C_HINT "请选择功能编号 [0-7]: " COLOR_RESET, 0, 7);
 }
 
 /*
@@ -371,9 +372,9 @@ void mainpage(List* list)
 		case 6:get(list); break;
 		case 7:read(list); break;
 		case 0:my_exit(list); break;
-		default:printf("不是有效的功能，请重新选择\n");
+		default:printf(C_ERR "不是有效的功能，请重新选择\n" COLOR_RESET);
 		}
-		printf("按回车键继续...");
+		printf(C_HINT "按回车键继续..." COLOR_RESET);
 		if (getchar() != 1) {
 			;
 		}
@@ -394,7 +395,7 @@ int main() {
 #endif
 	List* student_list = list_create();
 	if (student_list == NULL) {
-		fprintf(stderr, "核心故障: 初始化基础数据结构驱动失败！\n");
+		fprintf(stderr, C_ERR "核心故障: 初始化基础数据结构驱动失败！\n" COLOR_RESET);
 		return 1;
 	}
 

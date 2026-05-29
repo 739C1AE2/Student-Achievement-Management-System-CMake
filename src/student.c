@@ -10,6 +10,7 @@
 
 #include"list.h"
 #include"student.h"
+#include"terminal_colors.h"
 
 #include<stdio.h>
 #include<stdlib.h>
@@ -55,7 +56,7 @@ static void student_printf_single(const Student* stu, int op) {
 			total_score);
 	}
 	else if (op == 1) {
-		printf("| 学号: %-10s | 姓名: %-10s | 语文: %-3d | 数学: %-3d | 英语: %-3d | 总分: %-3d |\n",
+		printf(C_BORDER "|" COLOR_RESET " " C_LABEL "学号:" COLOR_RESET " " C_VALUE "%-10s" COLOR_RESET " " C_BORDER "|" COLOR_RESET " " C_LABEL "姓名:" COLOR_RESET " " C_VALUE "%-10s" COLOR_RESET " " C_BORDER "|" COLOR_RESET " " C_LABEL "语文:" COLOR_RESET " " C_HIGHLIGHT "%-3d" COLOR_RESET " " C_BORDER "|" COLOR_RESET " " C_LABEL "数学:" COLOR_RESET " " C_HIGHLIGHT "%-3d" COLOR_RESET " " C_BORDER "|" COLOR_RESET " " C_LABEL "英语:" COLOR_RESET " " C_HIGHLIGHT "%-3d" COLOR_RESET " " C_BORDER "|" COLOR_RESET " " C_LABEL "总分:" COLOR_RESET " " C_HIGHLIGHT "%-3d" COLOR_RESET " " C_BORDER "|\n" COLOR_RESET,
 			stu->id, stu->name,
 			stu->scores[CHINESE], stu->scores[MATH], stu->scores[ENGLISH],
 			total_score);
@@ -70,7 +71,7 @@ bool student_add(List* list, const char* id, const char* name, int scores[]) {
 	if (list == NULL || id == NULL || name == NULL) return false;
 	// 学号查重
 	if (find_student_node_by_id(list, id) != NULL) {
-		printf("添加失败：学号 [%s] 已存在！\n", id);
+		printf(C_ERR "添加失败：学号 [" C_HIGHLIGHT "%s" C_ERR "] 已存在！\n" COLOR_RESET, id);
 		return false;
 	}
 
@@ -99,7 +100,7 @@ bool student_add(List* list, const char* id, const char* name, int scores[]) {
 bool student_query_by_id(List* list, const char* id) {
 	Node* target_node = find_student_node_by_id(list, id);
 	if (target_node == NULL) {
-		printf("查询失败：未找到学号为 [%s] 的学生！\n", id);
+		printf(C_WARN "查询失败：未找到学号为 [" C_HIGHLIGHT "%s" C_WARN "] 的学生！\n" COLOR_RESET, id);
 		return false;
 	}
 
@@ -114,7 +115,7 @@ bool student_query_by_id(List* list, const char* id) {
 bool student_delete_by_id(List* list, const char* id) {
 	Node* target_node = find_student_node_by_id(list, id);
 	if (target_node == NULL) {
-		printf("删除失败：未找到学号为 [%s] 的学生！\n", id);
+		printf(C_WARN "删除失败：未找到学号为 [" C_HIGHLIGHT "%s" C_WARN "] 的学生！\n" COLOR_RESET, id);
 		return false;
 	}
 	// 别忘了把结构体里的结构体指针所指的结构体释放，要不然就是垃圾数据了
@@ -131,7 +132,7 @@ int student_query_by_name(List* list, const char* name) {
 
 	int match_count = 0;
 	Node* current = list->head->next;
-	printf("\n--- 开始按姓名 [%s] 搜索 ---\n", name);
+	printf("\n" C_SUBTITLE "--- 开始按姓名 [" C_HIGHLIGHT "%s" C_SUBTITLE "] 搜索 ---\n" COLOR_RESET, name);
 
 	while (current != list->tail) {
 		Student* student = (Student*)current->data;
@@ -144,10 +145,10 @@ int student_query_by_name(List* list, const char* name) {
 	}
 
 	if (match_count == 0) {
-		printf("提示：未找到任何姓名匹配为 [%s] 的学生。\n", name);
+		printf(C_WARN "提示：未找到任何姓名匹配为 [" C_HIGHLIGHT "%s" C_WARN "] 的学生。\n" COLOR_RESET, name);
 	}
 	else {
-		printf("搜索完毕，共找到 %d 名学生。\n", match_count);
+		printf(C_OK "搜索完毕，共找到 " C_HIGHLIGHT "%d" C_OK " 名学生。\n" COLOR_RESET, match_count);
 	}
 
 	return match_count;
@@ -176,10 +177,10 @@ int student_delete_by_name(List* list, const char* name) {
 	}
 
 	if (delete_count > 0) {
-		printf("成功：已从系统中批量删除 %d 名姓名为 [%s] 的学生。\n", delete_count, name);
+		printf(C_OK "成功：已从系统中批量删除 " C_HIGHLIGHT "%d" C_OK " 名姓名为 [" C_HIGHLIGHT "%s" C_OK "] 的学生。\n" COLOR_RESET, delete_count, name);
 	}
 	else {
-		printf("提示：未找到姓名匹配为 [%s] 的学生，无数据被删除。\n", name);
+		printf(C_WARN "提示：未找到姓名匹配为 [" C_HIGHLIGHT "%s" C_WARN "] 的学生，无数据被删除。\n" COLOR_RESET, name);
 	}
 
 	return delete_count;
@@ -190,14 +191,14 @@ int student_delete_by_name(List* list, const char* name) {
 */
 void student_print_all(List* list) {
 	if (list == NULL || list->size == 0) {
-		printf("系统提示：当前没有任何学生数据\n");
+		printf(C_WARN "系统提示：当前没有任何学生数据\n" COLOR_RESET);
 		return;
 	}
 
-	printf("\n【学生成绩总表】(总人数: %d)\n", list->size);
-	printf("------------------------------------------------------------\n");
-	printf("%-12s\t%-12s\t%-6s\t%-6s\t%-6s\t%-6s\n", "学号", "姓名", "语文", "数学", "英语", "总分");
-	printf("------------------------------------------------------------\n");
+	printf("\n" C_TITLE "【学生成绩总表】" COLOR_RESET "(总人数: " C_HIGHLIGHT "%d" COLOR_RESET ")\n", list->size);
+	printf(C_BORDER "------------------------------------------------------------\n" COLOR_RESET);
+	printf(C_LABEL "%-12s\t%-12s\t%-6s\t%-6s\t%-6s\t%-6s\n" COLOR_RESET, "学号", "姓名", "语文", "数学", "英语", "总分");
+	printf(C_BORDER "------------------------------------------------------------\n" COLOR_RESET);
 
 	Node* current = list->head->next;
 	while (current != list->tail) {
@@ -205,7 +206,7 @@ void student_print_all(List* list) {
 		student_printf_single(student, 0);
 		current = current->next;
 	}
-	printf("------------------------------------------------------------\n");
+	printf(C_BORDER "------------------------------------------------------------\n" COLOR_RESET);
 }
 
 /*
